@@ -9,6 +9,10 @@ module.exports = {
       colors:{
         green:{
           botao: '#52bc7e'
+        },
+
+        minWidth:{
+          'xs': '350px'
         }
       }
     },
