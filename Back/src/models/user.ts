@@ -17,7 +17,7 @@ userSchema.pre('save', async function(next){
   next();
 });
 
-interface IUser extends Document {
+export interface IUser extends Document {
 	nome: string;
 	email: string;
 	senha: string;

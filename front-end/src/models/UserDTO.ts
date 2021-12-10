@@ -5,7 +5,7 @@ export default class UserDTO{
   email!:string
   senha!:string
   senhaConf!:string
-  dataNascimento!: Date
+  dataNascimento!: string
 
   constructor(model?:UserDTO){
     if(!model) return;

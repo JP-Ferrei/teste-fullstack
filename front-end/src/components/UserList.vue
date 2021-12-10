@@ -1,38 +1,41 @@
 <template>
-  <div class="flex mx-auto flex-col gap-3 items-center rounded-lg border-2 border-gray-300 shadow-lg bg-white ">
-    <div class="my-5 md:flex md:flex-row md:flex-wrap md:gap-2 md:justify-evenly">
-      <UserCard v-for="user in lista" :key="user.id" :user=user class="" > </UserCard>
-
-    </div>
-  </div>
+	<div
+		class="flex w-screen h-screen mx-auto flex-col gap-3 items-center rounded-lg border-2 border-gray-300 shadow-lg bg-white"
+	>
+		<div
+			class="my-5 md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-2 md:justify-evenly md:overflow-y-scroll"
+		>
+			<div v-for="user in users" :key="user.id">
+				<UserCard :user="user" @excluir="getUsers()" style="max-width: 365px" />
+			</div>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
-import User from '../models/User';
-import UserCard from './UserCard.vue';
+	import axios from 'axios';
+	import { Component, Prop, Vue } from 'vue-property-decorator';
+	import User from '../models/User';
+	import UserCard from './UserCard.vue';
+	import UserService from '../service/UserService';
+	@Component({
+		components: {
+			UserCard,
+		},
+	})
+	export default class UserList extends Vue {
+		users: User[] = [];
+		userService: UserService = new UserService();
 
-  @Component({
-    components:{
-      UserCard
-    }
-  })
-  export default class UserList extends Vue {
-    lista: User[] = [{nome:'teste',email:'teste@mail.com',dataNascimento:new Date(1998,21,9), id:"223"},
-    {nome:'hehe',email:'hehe@mail.com',dataNascimento:new Date(1998,21,9), id:"123"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"234"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"214"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"236"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"224"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"2124"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"2334"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"2324"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"2314"},
-    {nome:'diego',email:'diego@mail.com',dataNascimento:new Date(1998,21,9), id:"21234"},
-    ]
-  }
+		async getUsers() {
+			const res = await this.userService.getUsers();
+			this.users = res.data.users;
+		}
+
+		async created() {
+			await this.getUsers();
+		}
+	}
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

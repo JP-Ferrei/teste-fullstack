@@ -1,7 +1,7 @@
 <template>
 	<div class="max-w-sm w-full rounded-lg border-2 border-gray-300 shadow-lg">
 		<h1 class="text-2xl font-semibold leading-none ml-7 my-5">
-			Cadastrar Usuario
+			Editar Usuario
 		</h1>
 
 		<div class="h-0.5 bg-gray-400 w-auto mx-5 my-2" />
@@ -10,21 +10,21 @@
 			<input
 				class="input"
 				v-model="user.nome"
-				placeholder="Nome"
+				:placeholder="user.nome"
 				type="text"
 				name=""
 			/>
 			<input
 				class="input"
 				v-model="user.email"
-				placeholder="Email"
+				:placeholder="user.email"
 				type="text"
 				name=""
 			/>
-			<input
+			<!-- <input
 				class="input"
 				v-model="user.senha"
-				placeholder="Senha"
+				placeholder="Nova Senha"
 				type="password"
 				name=""
 			/>
@@ -34,11 +34,11 @@
 				placeholder="Confirmar Senha"
 				type="password"
 				name=""
-			/>
+			/> -->
 			<input
 				class="input"
 				v-model="user.dataNascimento"
-				placeholder="DataNacimento"
+				:placeholder="user.dataNascimento"
 				type="date"
 				name=""
 			/>
@@ -49,12 +49,10 @@
 		</form>
 		<div class="h-0.5 bg-gray-400 w-auto mx-5 my-2" />
 		<div class="flex mt-4 mx-12 justify-end gap-4 mb-4">
-			<button class="botao bg-red-400 hover:bg-red-700" @click="apagar()">
-				Apagar
+			<button class="botao bg-red-400 hover:bg-red-700" @click="voltar()">
+				Voltar
 			</button>
-			<button class="botao botao-verde" @click="adicionarUser()">
-				Adicionar
-			</button>
+			<button class="botao botao-verde" @click="editarUser()">Editar</button>
 		</div>
 	</div>
 </template>
@@ -66,62 +64,48 @@
 	import UserService from '../service/UserService';
 
 	@Component
-	export default class UsuarioForm extends Vue {
+	export default class EditUser extends Vue {
 		user: UserDTO = new UserDTO();
 		userService: UserService = new UserService();
 
 		mensagemErro: string = '';
+		campoAux: number = 0;
 
-		apagar(): void {
-			this.user = new UserDTO();
-			this.mensagemErro = '';
+		id: string = '';
+
+		voltar(): void {
+			this.$router.back();
 		}
 
-		confirmarSenhas(): boolean {
-			if (this.user.senha.trim() === this.user.senhaConf.trim()) return true;
-			return false;
+		async created() {
+			this.id = this.$router.currentRoute.params.userId;
+
+			const res = await this.userService.getUser(this.id);
+			this.user = res.data;
+			this.user.dataNascimento = this.user.dataNascimento.substring(0, 10);
+			console.log(this.user);
 		}
 
-		async adicionarUser(): Promise<void> {
-			if (this.user.nome.length <= 0) {
-				this.mensagemErro = 'Por favor Preencha o campo nome';
-				return;
+		async editarUser() {
+			try {
+				const res = await this.userService.patchUser(this.id, this.user);
+				this.$router.push({ name: 'usuarios' });
+			} catch (e) {
+				console.log(e.message);
 			}
+		}
 
-			if (this.user.email.length <= 0) {
-				this.mensagemErro = 'Por favor Preencha o campo email';
-				return;
-			}
-
-			if (this.user.senha.length <= 0) {
-				this.mensagemErro = 'Por favor Preencha o campo senha';
-				return;
-			}
-
+		verificaCampos() {
 			if (!this.confirmarSenhas()) {
 				this.mensagemErro = 'senhas não são iguais';
 				return;
 			}
-			if (this.user.dataNascimento.length <= 0) {
-				this.mensagemErro = 'Por favor Preencha o campo dataNascimento';
-				return;
-			}
+		}
 
-			console.log('deu certo');
-			try {
-				const u = this.user;
-				const usuario: User = {
-					nome: u.nome,
-					email: u.email,
-					senha: u.senha,
-					dataNascimento: u.dataNascimento.toString(),
-				};
-				const res = await this.userService.postUser(usuario);
-				this.$router.push({ name: 'usuarios' });
-
-				this.user = new UserDTO();
-			} catch (e) {
-				console.log(e.message);
+		confirmarSenhas(): boolean {
+			if (this.user.senha !== undefined || this.user.senha !== undefined) {
+				if (this.user.senha === this.user.senhaConf) return true;
+				return false;
 			}
 		}
 	}
@@ -133,7 +117,7 @@
 	}
 
 	.botao-verde {
-		@apply bg-green-500 hover:bg-green-700;
+		@apply bg-blue-500 hover:bg-green-700;
 	}
 
 	.input {
